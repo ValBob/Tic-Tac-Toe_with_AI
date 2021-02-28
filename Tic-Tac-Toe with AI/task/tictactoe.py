@@ -1,4 +1,5 @@
-# write your code here
+import random
+
 
 class WrongMoveError(BaseException):
     pass
@@ -28,11 +29,11 @@ def print_table(table):
     print('-' * 9)
 
 
-def make_move(table):
+def human_input(table):
     while True:
-        coords = input('Enter the coordinates: ').split()
-        row = coords[0]
-        col = coords[1] if len(coords) == 2 else ""
+        coordinates = input('Enter the coordinates: ').split()
+        row = coordinates[0]
+        col = coordinates[1] if len(coordinates) == 2 else ""
         try:
             if bool((set(row) | set(col)) - set('0123456789')):  # check if row and col consist anything but digits
                 raise NotNumberError
@@ -47,13 +48,18 @@ def make_move(table):
         except CellOccupiedError:
             print('This cell is occupied! Choose another one!')
         else:
-            next_mark = 'X'
-            if sum(row.count('X') for row in table) > sum(row.count('O') for row in table):
-                next_mark = 'O'
             row, col = int(row) - 1, int(col) - 1
-            table[row][col] = next_mark
-            print_table(table)
-            return table, row, col
+            return row, col
+
+
+def make_move(table, row, col):
+    while True:
+        next_mark = 'X'
+        if sum(row.count('X') for row in table) > sum(row.count('O') for row in table):
+            next_mark = 'O'
+        table[row][col] = next_mark
+        print_table(table)
+        return table, row, col
 
 
 def move_result(table, row, col):
@@ -86,7 +92,6 @@ def move_result(table, row, col):
                     continue
             else:
                 win = True
-                print('\\ wins')
         if row + col == 2:
             for cell in range(3):
                 if table[2 - cell][cell] != last_mark:
@@ -98,19 +103,36 @@ def move_result(table, row, col):
         break
     if win:
         print(f'{last_mark} wins')
+        return True
     else:
         if sum(row.count('X') for row in table) + sum(row.count('O') for row in table) == 9:
             print('Draw')
+            return True
         else:
-            print('Game not finished')
+            return False
 
 
-initial = input('Enter the cells: ')
-char_generator = (char for char in initial)
-start_table = [[next(char_generator) for j in range(3)] for i in range(3)]
+def easy_level(table):
+    print('Making move level "easy"')
+    empty_cells = [(i, j) for i in range(3) for j in range(3) if table[i][j] == '_']
+    random.seed()
+    row, col = empty_cells[random.randint(0, len(empty_cells) - 1)]
+    return row, col
+
+
+start_table = [['_' for j in range(3)] for i in range(3)]
 
 print_table(start_table)
 
-current_table, row_, col_ = make_move(start_table)
+cur_table = start_table
+cnt = 0
+while True:
+    if cnt % 2 == 0:
+        row_, col_ = human_input(cur_table)
+    else:
 
-move_result(current_table, row_, col_)
+        row_, col_ = easy_level(cur_table)
+    make_move(cur_table, row_, col_)
+    cnt += 1
+    if move_result(cur_table, row_, col_):
+        break
