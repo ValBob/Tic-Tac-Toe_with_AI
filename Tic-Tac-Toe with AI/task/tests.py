@@ -19,9 +19,35 @@ class TicTacToeTests(StageTest):
     easy_ai_moves = [0 for _ in range(9)]
 
     @dynamic_test(order=1)
+    def test_bad_parameters(self):
+        program = TestedProgram()
+        program.start()
+
+        output = program.execute("start")
+
+        if "bad parameters" not in output.lower():
+            return CheckResult.wrong("After entering start command with wrong parameters you should print "
+                                     "'Bad parameters!' and ask to enter a command again!")
+
+        output = program.execute("start easy")
+
+        if "bad parameters" not in output.lower():
+            return CheckResult.wrong("After entering start command with wrong parameters you should print "
+                                     "'Bad parameters!' and ask to enter a command again!")
+
+        program.execute("exit")
+
+        if not program.is_finished():
+            return CheckResult.wrong("After entering 'exit' command you should stop the program!")
+
+        return CheckResult.correct()
+
+    @dynamic_test(order=2)
     def test_grid_output(self):
         program = TestedProgram()
-        output = program.start()
+        program.start()
+
+        output = program.execute("start user easy")
 
         printed_grid = Grid.from_output(output)
         empty_grid = Grid.from_line("_________")
@@ -86,11 +112,13 @@ class TicTacToeTests(StageTest):
 
         return CheckResult.correct()
 
-    @dynamic_test(repeat=100, order=2)
+    @dynamic_test(repeat=100, order=3)
     def check_easy_ai(self):
 
         program = TestedProgram()
         program.start()
+
+        program.execute("start user easy")
 
         output = program.execute("2 2")
 
@@ -107,7 +135,7 @@ class TicTacToeTests(StageTest):
 
         return CheckResult.correct()
 
-    @dynamic_test(order=3)
+    @dynamic_test(order=4)
     def check_random(self):
 
         average_score = 0
@@ -126,7 +154,7 @@ class TicTacToeTests(StageTest):
 
     is_easy_not_moving_like_medium = False
 
-    @dynamic_test(repeat=30, order=4)
+    @dynamic_test(repeat=30, order=5)
     def check_easy_not_moving_like_medium(self):
 
         if self.is_easy_not_moving_like_medium:
@@ -158,10 +186,24 @@ class TicTacToeTests(StageTest):
 
         return CheckResult.correct()
 
-    @dynamic_test(order=5)
+    @dynamic_test(order=6)
     def check_easy_not_moving_like_medium_after(self):
         if not self.is_easy_not_moving_like_medium:
             return CheckResult.wrong("Looks like your Easy level AI doesn't make a random move!")
+        return CheckResult.correct()
+
+    @dynamic_test(order=7)
+    def check_easy_vs_easy(self):
+
+        program = TestedProgram()
+        program.start()
+
+        output = program.execute("start easy easy")
+
+        grids = Grid.all_grids_from_output(output)
+
+        Grid.check_grid_sequence(grids)
+
         return CheckResult.correct()
 
 

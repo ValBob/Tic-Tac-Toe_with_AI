@@ -120,19 +120,44 @@ def easy_level(table):
     return row, col
 
 
-start_table = [['_' for j in range(3)] for i in range(3)]
+def main_menu():
+    while True:
+        command = input('Input command: ').split()
+        if command[0] == 'exit':
+            return False
+        elif command[0] == 'start' and len(command) == 3:
+            if (command[1] in {'user', 'easy'} and
+                    command[2] in {'user', 'easy'}):
+                return command[1], command[2]
+        print('Bad parameters!')
 
-print_table(start_table)
 
-cur_table = start_table
-cnt = 0
-while True:
-    if cnt % 2 == 0:
-        row_, col_ = human_input(cur_table)
+def player(table, input_source):
+    if input_source == 'user':
+        return human_input(table)
+    elif input_source == 'easy':
+        return easy_level(table)
     else:
+        print('There is no such player')
 
-        row_, col_ = easy_level(cur_table)
-    make_move(cur_table, row_, col_)
-    cnt += 1
-    if move_result(cur_table, row_, col_):
+
+while True:
+    game_params = main_menu()
+    if not game_params:
         break
+    X_player, O_player = game_params
+    start_table = [['_' for j in range(3)] for i in range(3)]
+
+    print_table(start_table)
+
+    cur_table = start_table
+    cnt = 0
+    while True:
+        if cnt % 2 == 0:
+            row_, col_ = player(cur_table, X_player)
+        else:
+            row_, col_ = player(cur_table, O_player)
+        make_move(cur_table, row_, col_)
+        cnt += 1
+        if move_result(cur_table, row_, col_):
+            break
